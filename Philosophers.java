@@ -1,6 +1,5 @@
 public class Philosophers {
 	private static int NUM_PHIL = 5;
-
 	public static void main(String[] args) throws InterruptedException {
 		Object[] forks = new Object[NUM_PHIL];
 		Philosopher[] phils = new Philosopher[NUM_PHIL];
@@ -10,18 +9,31 @@ public class Philosophers {
 		}
 		// Initialize philosophers with two forks each
 		for(int i=0; i<phils.length; i++) {
+
+			if(i != 4){
 			phils[i]=new Philosopher(i, forks[i], forks[(i+1) % phils.length]);
+			}else{
+				phils[i] = new Philosopher(i, forks[(i+1) % phils.length],forks[i] );
+			}
+
+
 		}
+		
 		for(Thread p : phils)  {
 			// TODO start the philosophers
+			p.start();
 		}
 		// Keep running until the user presses ENTER
 		new java.util.Scanner(System.in).nextLine();
-		for(Thread p : phils) {
+		for(Philosopher p : phils) {
 			// TODO request termination from all philosophers
+			p.terminate();
+			
+			
 		}
 		for(Thread p : phils) {
 			// TODO wait for all philosophers to finish
+			p.join();
 		}
 		System.out.println("All philosophers finished dining.");
 	}
@@ -29,11 +41,17 @@ public class Philosophers {
 	static class Philosopher extends Thread {
 		private final Object leftFork, rightFork;
 		private final int id;
+		private boolean run = true;
+
 
 		public Philosopher(int id, Object leftFork, Object rightFork) {
 			this.id = id;
 			this.leftFork = leftFork;
 			this.rightFork = rightFork;
+		}
+
+		public  void terminate(){
+			this.run = false;
 		}
 
 		private void eat() throws InterruptedException {
@@ -53,12 +71,17 @@ public class Philosophers {
 
 		public void run( ) {
 			try {
-				while(/* TODO keep running until requested to terminate */) {
+				while(run) {
 					think();
 					waiting();
 					// TODO pick up forks by synchronizing on the two forks
 					// TODO to eat, forks have to be "held"
-					eat();
+					synchronized(leftFork){
+						synchronized(rightFork){
+						eat();
+						}
+					}
+
 					// TODO put down forks by existing the synchronized context
 				}
 			} catch(InterruptedException ie) {
