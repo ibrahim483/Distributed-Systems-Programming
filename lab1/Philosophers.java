@@ -1,3 +1,4 @@
+package lab1;
 public class Philosophers {
 	private static int NUM_PHIL = 5;
 	public static void main(String[] args) throws InterruptedException {
