@@ -1,4 +1,5 @@
-public class Philosophers {
+package lab1;
+public class Philosophers_Khaled {
 	private static int NUM_PHIL = 5;
 
 
