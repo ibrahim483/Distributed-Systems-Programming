@@ -112,6 +112,7 @@ public class Server implements Runnable {
                         
                     }else if (message.startsWith("/quit")) {
                         brodcast(nickname + " left the chat! ");
+                        System.out.println("out");
                         shoutDown();
                         
                     }else {
@@ -144,7 +145,6 @@ public class Server implements Runnable {
             }
  
         }
-    
         
     }
 
