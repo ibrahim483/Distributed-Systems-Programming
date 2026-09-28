@@ -41,7 +41,7 @@ public class Client{
             writer.flush();
 
             Scanner s = new Scanner(System.in);
-            while (socket.isConnected()) {
+            while (!socket.isClosed()) {
                 String message = s.nextLine();
                 writer.write(userName + ": " +  message);
                 writer.newLine();
@@ -61,9 +61,12 @@ public class Client{
             public void run() {
                String message;
                
-               while (socket.isConnected()) {
+               while (!socket.isClosed()) {
                     try
                     {
+                        if (socket.isClosed()) {
+                            break;
+                        }
                         message = reader.readLine();
                         System.out.println(message);
                     }catch(IOException e)
@@ -71,12 +74,13 @@ public class Client{
                         close(socket, reader, writer);
                     }
                }
+               close(socket, reader, writer);
             }
             
         }).start();
     }
 
-     private void close(Socket s, BufferedReader br, BufferedWriter bw){
+     public void close(Socket s, BufferedReader br, BufferedWriter bw){
 
         try
         {
@@ -95,11 +99,14 @@ public class Client{
         }
     }
 
+    public void print(String message){
+        System.out.println(message);
+    }
+
     public static void main(String[] args) throws IOException{
         Socket s = new Socket("localhost", 1234);
-
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter UserName:");
+        System.out.print("Enter UserName:");
         String UserName = scanner.next();
 
         Client c = new Client(s, UserName);

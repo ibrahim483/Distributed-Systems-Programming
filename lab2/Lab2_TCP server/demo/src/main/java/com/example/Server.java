@@ -18,6 +18,7 @@ public class Server {
                 Socket newSocket = socket.accept();
                 System.out.println("A new client has joined.");
 
+
                 ClientHandler handler = new ClientHandler(newSocket);
                 Thread thread = new Thread(handler);
                 thread.start();
