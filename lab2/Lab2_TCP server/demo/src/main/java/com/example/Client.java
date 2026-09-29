@@ -43,7 +43,7 @@ public class Client{
             Scanner s = new Scanner(System.in);
             while (!socket.isClosed()) {
                 String message = s.nextLine();
-                writer.write(userName + ": " +  message);
+                writer.write(message);
                 writer.newLine();
                 writer.flush();
             }
@@ -64,10 +64,11 @@ public class Client{
                while (!socket.isClosed()) {
                     try
                     {
-                        if (socket.isClosed()) {
+                        message = reader.readLine();
+                        if (message == null) {
+                            close(socket, reader, writer);
                             break;
                         }
-                        message = reader.readLine();
                         System.out.println(message);
                     }catch(IOException e)
                     {

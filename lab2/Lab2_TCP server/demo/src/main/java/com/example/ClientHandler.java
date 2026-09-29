@@ -14,6 +14,7 @@ public class ClientHandler implements Runnable{
     private Socket socket;
     private boolean superUser = false;
     private String password = "/Admin";
+    private String privateConnection = "Public";
     private BufferedReader reader;
     private BufferedWriter writer;
     private String clientUserName;
@@ -23,14 +24,13 @@ public class ClientHandler implements Runnable{
             try
             {
                 this.socket = s;
-                System.out.println(s);
                 this.reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
                 this.writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
                 this.clientUserName = reader.readLine();
                 synchronized(clients){
                     clients.add(this);
                 }
-                broadcastMessage("SERVER: " + clientUserName + " has joined the chat.");
+                broadcastMessage("has joined the chat.");
             }catch(IOException e)
             {
                 close(socket, reader, writer);
@@ -38,6 +38,9 @@ public class ClientHandler implements Runnable{
             }
     }
 
+    private void routMessages(String messageToRout, String adress){
+
+    }
 
     private void broadcastMessage(String messageToBroadCast){
         
@@ -54,10 +57,9 @@ public class ClientHandler implements Runnable{
             System.out.println("something went wrong in admin right in brodcast");
         }
         
-        if (messageToBroadCast.substring(this.clientUserName.length() + 2, this.clientUserName.length() + 6).equals("/ban") && this.superUser) 
+        if (messageToBroadCast.startsWith("/ban") && this.superUser) 
             {
-                banUser(messageToBroadCast);
-                return;
+                messageToBroadCast = banUser(messageToBroadCast);
             }
             try
             {
@@ -65,7 +67,7 @@ public class ClientHandler implements Runnable{
                     for (ClientHandler c: clients) {
                         
                         if (!c.clientUserName.equals(clientUserName)) {
-                            c.writer.write(messageToBroadCast);
+                            c.writer.write(clientUserName + ": " + messageToBroadCast);
                             c.writer.newLine();
                             c.writer.flush();
                         }
@@ -78,24 +80,23 @@ public class ClientHandler implements Runnable{
                 }
     }
 
-    private void banUser(String messageToBroadCast) {
-        String userToBan = messageToBroadCast.substring(7 + clientUserName.length());
+    private String banUser(String messageToBroadCast) {
+        String userToBan = messageToBroadCast.substring("/ban".length() + 1);// +1 since the string starts from index 0
         synchronized(clients){
             for (ClientHandler c : clients) {
                 if (c.clientUserName.equals(userToBan) && !this.clientUserName.equals(userToBan)) {
-                    System.out.println("close called in Ban");
                     c.close(c.socket, c.reader, c.writer);
-                    return;
+                    return (c.clientUserName  + " was banned from the server!");
                 }
             }
+            return null;
         }
 
     }
 
 
     private boolean chehcPrivilage(String password) {
-        String code = password.substring(this.clientUserName.length() + 2);
-        return this.password.equals(code);
+        return password.startsWith("/Admin");
     }
 
 
@@ -104,7 +105,7 @@ public class ClientHandler implements Runnable{
         synchronized(clients){
 
             clients.remove(this);
-            broadcastMessage("SERVER: " + clientUserName + " has left the chat.");
+            broadcastMessage(clientUserName + " has left the chat.");
         }
     }
 
