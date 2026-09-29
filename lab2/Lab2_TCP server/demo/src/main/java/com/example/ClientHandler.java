@@ -39,7 +39,17 @@ public class ClientHandler implements Runnable{
     }
 
     private void routMessages(String messageToRout, String adress){
+        if (this.privateConnection.equals("Public")) {
+            broadcastMessage(messageToRout);
+        }
+        else
+        {
+            sendPrivateMessage(messageToRout, adress);
+        }
+    }
 
+    private void sendPrivateMessage(String messageToRout, String adress) {
+        
     }
 
     private void broadcastMessage(String messageToBroadCast){
