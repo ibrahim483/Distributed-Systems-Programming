@@ -1,3 +1,5 @@
+package Learning;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -20,17 +22,17 @@ public class Client implements Runnable {
             in = new DataInputStream(client.getInputStream());
             out = new DataOutputStream(client.getOutputStream());
 
-            // Del 1: en egen tråd som läser det du skriver på tangentbordet
+            
             Thread inputThread = new Thread(new InputHandler());
-            inputThread.setDaemon(true); // så att programmet kan avslutas även om tråden väntar på input
+            inputThread.setDaemon(true); 
             inputThread.start();
 
-            // Del 2: huvudtråden lyssnar hela tiden efter meddelanden från servern
             while (!done) {
                 String message = in.readUTF();
                 System.out.println(message);
             }
         } catch (IOException e) {
+                    
             shutdown();
         }
     }
@@ -42,11 +44,10 @@ public class Client implements Runnable {
             if (out != null) out.close();
             if (client != null && !client.isClosed()) client.close();
         } catch (IOException e) {
-            // ignorera, vi stänger ändå
+
         }
     }
 
-    // Inre klass som läser från tangentbordet och skickar till servern
     class InputHandler implements Runnable {
 
     @Override
@@ -56,17 +57,24 @@ public class Client implements Runnable {
 
             while (!done) {
                 String message = keyboard.readLine();
+                if (message == null) {
+                    shutdown();
+                    break;
+                }
                 out.writeUTF(message);
 
                 if (message.equals("/quit")) {
                     shutdown();
                 }
+
             }
         } catch (IOException e) {
             shutdown();
         }
     }
+
 }
+
 
     public static void main(String[] args) {
         Client clie = new Client();
