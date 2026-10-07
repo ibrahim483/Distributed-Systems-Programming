@@ -1,4 +1,4 @@
-package Learning;
+package lab2_TCP_server_ibrahim;
 
 import java.io.IOException;
 import java.net.ServerSocket;

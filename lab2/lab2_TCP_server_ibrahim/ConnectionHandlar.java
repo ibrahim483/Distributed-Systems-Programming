@@ -1,4 +1,4 @@
-package Learning;
+package lab2_TCP_server_ibrahim;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
