@@ -76,9 +76,13 @@ public class ConnectionHandlar implements Runnable {
                     if (p != null) {
                         p.sendMessage("[private] " + nickname + ": " + message);
                         sendMessage("[private] " + nickname + ": " + message);
+                    }else{
+
+                    server.brodcast(nickname + ": " + message);
+
+
                     }
                     
-                    server.brodcast(nickname + ": " + message);
                 }
             }
             shutdown();
