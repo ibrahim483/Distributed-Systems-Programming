@@ -129,5 +129,32 @@ public synchronized void removeAdmin(ConnectionHandlar ch) {
         ser.run();
     }
 
+    public synchronized boolean connectPartnar(ConnectionHandlar a, ConnectionHandlar b){
+        if (a.getPartnar() == null && b.getPartnar() == null ) {
+
+            a.setPartnar(b);
+            b.setPartnar(a);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public synchronized ConnectionHandlar removePartnar(ConnectionHandlar a){
+
+        ConnectionHandlar b = a.getPartnar();
+
+        if (a.getPartnar() != null && b.getPartnar() != null) {
+
+            a.setPartnar(null);
+            b.setPartnar(null);
+
+        }
+
+        return b;
+
+    }
+
 
 }

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 public class ConnectionHandlar implements Runnable {
 
     private static final String ADMIN_PASSWORD = "kalb";
+    
+    
 
 
     private Socket client;
@@ -18,6 +20,7 @@ public class ConnectionHandlar implements Runnable {
     private Server server;
 
     private volatile boolean kicked = false;
+    private volatile ConnectionHandlar partnar;
 
 
 
@@ -62,7 +65,19 @@ public class ConnectionHandlar implements Runnable {
                 } else if (message.startsWith("/ban")) {
                     handleBan(message);
  
-                } else {
+                } else if (message.startsWith("/private")) {
+                    handelPrivate(message);
+                }
+                
+                else {
+
+                    ConnectionHandlar p = partnar;
+
+                    if (p != null) {
+                        p.sendMessage("[private] " + nickname + ": " + message);
+                        sendMessage("[private] " + nickname + ": " + message);
+                    }
+                    
                     server.brodcast(nickname + ": " + message);
                 }
             }
@@ -139,6 +154,43 @@ public class ConnectionHandlar implements Runnable {
 
     }
 
+
+    public void handelPrivate(String message){
+
+        String[] parts = message.split(" ", 2);
+
+        if (parts.length != 2) {
+            System.out.println("To get a partnar type /private <target name>");
+            return;
+        }
+
+        String targetName = parts[1];
+        if (targetName.equals(nickname)) {
+            sendMessage("You can't start a chatt with yourself");
+            return ;
+            
+        }
+
+        ConnectionHandlar target = server.findByName(targetName);
+
+        if (target == null) {
+            sendMessage("There is no such user in this server!");
+            return;
+        }
+        if (server.connectPartnar(this, target)) {
+            sendMessage("Private chat with " + targetName + " started. Type /public to leave.");
+            target.sendMessage("Private chat with " + nickname + " started. Type /public to leave.");
+            System.out.println("Private chat between " + nickname + " and " + targetName);
+        }else{
+
+        sendMessage("you or " + targetName + " are already in a private chatt");
+
+
+        }
+
+
+    }
+
     private void kick(){
         kicked = true;
         sendMessage("You have been kicked! ");
@@ -174,6 +226,15 @@ public class ConnectionHandlar implements Runnable {
 
     public String getNickname(){
         return nickname;
+    }
+
+    public ConnectionHandlar getPartnar(){
+        return partnar;
+    }
+
+    public void setPartnar(ConnectionHandlar a){
+        partnar = a;
+        
     }
 
 }
