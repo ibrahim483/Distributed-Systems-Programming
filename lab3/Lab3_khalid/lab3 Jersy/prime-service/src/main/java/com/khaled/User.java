@@ -13,39 +13,51 @@ import jakarta.ws.rs.core.Response;
 public class User {
     
 
-    private Client client;
-    private WebTarget target; 
-    private WebTarget getTarget; 
-    private WebTarget postTarget;
-    private Invocation.Builder request;
-    private Response response; 
+    private final Client client;
+    private final WebTarget target;
 
-
-    public User(){
+    public User() {
         client = ClientBuilder.newClient();
-        target = client.target("http://localhost:8080").path("/prime");
-        getTarget = target.path("/numbers/{id}");
-        postTarget = target.path("/numbers/{id}/{prime}");
-        request = getTarget.request(MediaType.TEXT_PLAIN);
-    }
-    
-    public Response getPrime(int id){
-        getTarget = target.path("/numbers/{id}").resolveTemplate("id", id);
-        return response = request.get();
-        
-        
-    }
-    public Response postPrime(int id, boolean prime){
-        postTarget = target.path("/numbers/{id}/{prime}")
-        .resolveTemplate("id", id)
-        .resolveTemplate("prime", prime);
-        return response= request.post(null);
+        target = client.target("http://localhost:8080")
+                       .path("/prime");
     }
 
-    private boolean calculatePrimeness() {
-        //to be implemented later
-        return false;
-    } 
+    public Response getPrime(int id) {
+        WebTarget getTarget = target.path("/numbers/{id}")
+                .resolveTemplate("id", id);
+
+        Invocation.Builder request =
+                getTarget.request(MediaType.TEXT_PLAIN);
+
+        return request.get();
+    }
+
+    public Response postPrime(int id, boolean prime) {
+        WebTarget postTarget = target.path("/numbers/{id}/{prime}")
+                .resolveTemplate("id", id)
+                .resolveTemplate("prime", prime);
+
+        Invocation.Builder request = postTarget.request();
+
+        return request.post(null);
+    }
+
+    private boolean calculatePrimeness(int number) {
+        if (number < 2) {
+            return false;
+        }
+
+        for (int divisor = 2;
+             divisor <= number / divisor;
+             divisor++) {
+
+            if (number % divisor == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public static void main(String[] args) {
         User u = new User();
