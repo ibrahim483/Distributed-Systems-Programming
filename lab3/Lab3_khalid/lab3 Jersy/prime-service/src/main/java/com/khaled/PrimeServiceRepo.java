@@ -6,16 +6,18 @@ import java.util.List;
 public class PrimeServiceRepo {
 
     List<PrimeValue> primes = new ArrayList<>();
+    List<Integer> serverPorts = new ArrayList<>();
+
     
 
-   public Boolean getPrimeness(int id) {
-    for (PrimeValue p : primes) {
-        if (id == p.getNumber()) {
-            return p.getPrime();
+    public Boolean getPrimeness(int id) {
+        for (PrimeValue p : primes) {
+            if (id == p.getNumber()) {
+                return p.getPrime();
+            }
         }
+        return null;
     }
-    return null;
-}
 
     public void postPrime(int id, boolean prime) {
         PrimeValue p = new PrimeValue();

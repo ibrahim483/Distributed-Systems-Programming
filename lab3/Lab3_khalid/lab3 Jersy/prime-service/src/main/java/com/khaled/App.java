@@ -6,32 +6,58 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
+
 public class App {
 
     public static void main(String[] args) throws Exception {
 
-        // 1. Create your existing objects.
+        //get port number on creation
+        int port = Integer.parseInt(args[0]);
+        
         PrimeServiceRepo repo = new PrimeServiceRepo();
         PrimeServiceResource resource = new PrimeServiceResource(repo);
 
-        // 2. Tell Jersey which resource to use.
+        Client client = ClientBuilder.newClient();
+        WebTarget registryTarget = client.target("http://localhost:8090").path("reg");
+        
         ResourceConfig config = new ResourceConfig();
         config.register(resource);
+    
 
-        // 3. Choose the server's address.
-        URI address = URI.create("http://localhost:8080/");
+        URI address = URI.create("http://localhost:" + port + "/");
 
-        // 4. Create AND start the HTTP server.
         HttpServer server =
                 GrizzlyHttpServerFactory.createHttpServer(address, config);
 
+
+      
+        try {
+              try(Response response = registryTarget.path("add/{port}")
+                                .resolveTemplate("port", port)
+                                .request()
+                                .post(null))
+        {
+            int status = response.getStatus();
+            if (status >= 200 && status < 300) {
+                System.out.println("Registered port " + port);
+            } else {
+                System.out.println("Registration failed: HTTP " + status);
+            }
+        }
+
+        
+
+
+        
         System.out.println("Server running at " + address);
         System.out.println("Press Enter to stop.");
-
-        try {
-            // Keep the program running until you press Enter.
-            System.in.read();
+        System.in.read();
         } finally {
+            client.close();
             server.shutdownNow();
         }
     }

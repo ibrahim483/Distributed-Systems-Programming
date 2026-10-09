@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
@@ -61,27 +60,86 @@ public class User {
 
     public static void main(String[] args) {
         User u = new User();
-        Scanner s = new Scanner(System.in);
-        Response rs;
-        while (true) {
-            int number = Integer.parseInt(s.next());
-            if (number.) {//check if this is actually a number othrewise skip or exit or return a rispons
-                
+
+        try (Scanner scanner = new Scanner(System.in)) {
+
+            while (true) {
+                System.out.print("Enter a number to check if it is prime, or 'exit': ");
+                System.out.println();
+                if (!scanner.hasNext()) {
+                    break;
+                }
+
+                if (scanner.hasNext("exit")) {
+                    scanner.next();
+                    break;
+                }
+
+                if (!scanner.hasNextInt()) {
+                    String invalid = scanner.next();
+                    System.out.println(
+                            "'" + invalid + "' is not a valid int. Try again."
+                    );
+                    continue;
+                }
+
+                int number = scanner.nextInt();
+
+                try {
+                    // First ask the server for an existing result.
+                    try (Response response = u.getPrime(number)) {
+                        int status = response.getStatus();
+
+                        if (status == 200) {
+                            String result =
+                                    response.readEntity(String.class);
+
+                            System.out.println(
+                                    "Stored result: " + number
+                                    + " is prime = " + result
+                            );
+                            continue;
+                        }
+
+                        if (status != 404) {
+                            System.out.println(
+                                    "Lookup failed. HTTP status: " + status
+                            );
+                            continue;
+                        }
+                    }
+
+                    // Only calculate when the server reported 404.
+                    boolean prime = u.calculatePrimeness(number);
+
+                    System.out.println(
+                            "Calculated result: " + number
+                            + " is prime = " + prime
+                    );
+
+                    // Submit the result to the server.
+                    try (Response response = u.postPrime(number, prime)) {
+                        int status = response.getStatus();
+
+                        if (status >= 200 && status < 300) {
+                            System.out.println("Result saved.");
+                        } else {
+                            System.out.println(
+                                    "Saving failed. HTTP status: " + status
+                            );
+                        }
+                    }
+
+                } catch (jakarta.ws.rs.ProcessingException e) {
+                    System.out.println(
+                            "Could not complete the HTTP request: "
+                            + e.getMessage()
+                    );
+                }
             }
-            rs = u.getPrime(number);
-            if (rs.getStatus() == 404) {
-                boolean prime = u.calculatePrimeness();
-                u.postPrime(number, prime);
-            }         
+
+        } finally {
+            u.client.close();
         }
-        
-        System.out.println(u.response.readEntity(String.class));
-
-        u.response.close();
-        u.client.close();
-   
-
-
-
     }
 }

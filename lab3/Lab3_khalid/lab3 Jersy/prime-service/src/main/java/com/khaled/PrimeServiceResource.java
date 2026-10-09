@@ -19,7 +19,7 @@ public class PrimeServiceResource {
     }
 
 
-   @GET
+    @GET
     @Path("/numbers/{id}")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getPrimeness(@PathParam("id") int id) {
